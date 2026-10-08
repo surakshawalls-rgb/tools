@@ -1,0 +1,331 @@
+<div class="app-shell">
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="Suraksha Quotation home">
+      <span class="brand-mark">S</span>
+      <span class="brand-name">SURAKSHA <span>TOOLS</span></span>
+    </a>
+    <div class="topbar-right">
+      <span class="saved-status"><span class="status-dot"></span>Private by design</span>
+      <a class="brand-link" href="https://www.surakshawalls.space/software" target="_blank" rel="noopener noreferrer">
+        Suraksha Software <span aria-hidden="true">↗</span>
+      </a>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <section class="hero animate-in">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="eyebrow-line"></span>PROJECT ESTIMATOR <span class="eyebrow-version">01 / QUOTATION</span></div>
+        <h1>Good projects<br>start with <em>clarity.</em></h1>
+        <p>Build a clear boundary wall or fencing estimate in a few steps. Adjust the details, see the numbers, and share your quote.</p>
+        <div class="hero-meta flex flex-wrap">
+          <span><span class="meta-icon">01</span> Add your measurements</span>
+          <span><span class="meta-icon">02</span> Choose a calculation</span>
+          <span><span class="meta-icon">03</span> Get your estimate</span>
+        </div>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <div class="art-orbit orbit-one"></div>
+        <div class="art-orbit orbit-two"></div>
+        <div class="art-core"><span>₹</span><small>ESTIMATE</small></div>
+        <div class="art-tag tag-one">WALLS <span>↗</span></div>
+        <div class="art-tag tag-two">FENCING <span>↗</span></div>
+        <div class="art-coordinate">25° 25' N<br>82° 34' E</div>
+      </div>
+    </section>
+
+    <div class="content-grid grid">
+      <section class="builder panel animate-in" aria-labelledby="builder-title">
+        <div class="panel-heading">
+          <div>
+            <div class="eyebrow eyebrow-dark"><span class="eyebrow-line"></span>BUILD A QUOTE</div>
+            <h2 id="builder-title">Quotation details</h2>
+          </div>
+          <button class="text-button" type="button" (click)="reset()">Start over <span aria-hidden="true">↺</span></button>
+        </div>
+
+        <div class="form-section">
+          <div class="section-heading">
+            <span class="step-number">01</span>
+            <div><h3>Choose a quotation type</h3><p>Select the work you would like to estimate.</p></div>
+          </div>
+          <div class="product-grid" role="group" aria-label="Quotation type">
+            <button type="button" class="product-card"
+              [class.selected]="productType === 'boundary-wall'"
+              [attr.aria-pressed]="productType === 'boundary-wall'"
+              (click)="chooseProduct('boundary-wall')">
+              <span class="product-icon">⌂</span>
+              <span class="product-title">Boundary Wall</span>
+              <span class="product-price">₹85 <small>/ sq ft</small></span>
+              <span class="product-note">All inclusive</span>
+              <span class="select-mark" aria-hidden="true">✓</span>
+            </button>
+            <button type="button" class="product-card"
+              [class.selected]="productType === 'barbed-fencing'"
+              [attr.aria-pressed]="productType === 'barbed-fencing'"
+              (click)="chooseProduct('barbed-fencing')">
+              <span class="product-icon">⌁</span>
+              <span class="product-title">Barbed Wire Fencing</span>
+              <span class="product-price">₹450 <small>/ pole</small></span>
+              <span class="product-note">Materials & installation</span>
+              <span class="select-mark" aria-hidden="true">✓</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="measurement-wall-layout" [class.wall-layout]="productType === 'boundary-wall'">
+        <div class="form-section">
+          <div class="section-heading">
+            <span class="step-number">02</span>
+            <div><h3>Add your measurements</h3><p>Enter one or more plot areas, or provide the measured perimeter.</p></div>
+          </div>
+
+          <div class="segmented-control" role="group" aria-label="Measurement type">
+            <button type="button" [class.active]="measurementType === 'area'" [attr.aria-pressed]="measurementType === 'area'" (click)="chooseMeasurement('area')">
+              <span aria-hidden="true">▦</span> By land area
+            </button>
+            <button type="button" [class.active]="measurementType === 'perimeter'" [attr.aria-pressed]="measurementType === 'perimeter'" (click)="chooseMeasurement('perimeter')">
+              <span aria-hidden="true">↔</span> By perimeter
+            </button>
+          </div>
+
+          <div class="measurement-entry" *ngIf="measurementType === 'area'">
+            <label class="field-label" for="area-biswa">Land area</label>
+            <div class="field-row">
+              <div class="input-with-unit">
+                <input id="area-biswa" type="number" min="0.01" step="any" [(ngModel)]="areaBiswa" (keydown.enter)="addField()" />
+                <span>Biswa</span>
+              </div>
+              <button class="button button-secondary add-button" type="button" (click)="addField()"><span aria-hidden="true">＋</span> Add plot</button>
+            </div>
+            <p class="field-hint">1 Biswa is estimated as 1,350 sq ft. Perimeter is approximated from a square plot.</p>
+          </div>
+
+          <div class="measurement-entry" *ngIf="measurementType === 'perimeter'">
+            <label class="field-label" for="perimeter-feet">Perimeter length</label>
+            <div class="field-row">
+              <div class="input-with-unit">
+                <input id="perimeter-feet" type="number" min="1" step="any" placeholder="e.g. 500" [(ngModel)]="customPerimeter" (keydown.enter)="addField()" />
+                <span>ft</span>
+              </div>
+              <button class="button button-secondary add-button" type="button" (click)="addField()"><span aria-hidden="true">＋</span> Add measurement</button>
+            </div>
+            <p class="field-hint">Use for irregular plots or whenever you know the exact boundary length.</p>
+          </div>
+
+          <div class="field-list" *ngIf="fields.length">
+            <div class="field-list-heading"><strong>Measurements added</strong><span>{{ fields.length }} {{ fields.length === 1 ? 'entry' : 'entries' }}</span></div>
+            <div class="field-row-item" *ngFor="let field of fields">
+              <span class="field-check" aria-hidden="true">✓</span>
+              <div class="field-item-copy"><strong>{{ field.displayText }}</strong><small>{{ field.measurementType === 'area' ? ((field.biswa ?? 0) * biswaToSqFt | number:'1.0-0') + ' sq ft · approx. square plot' : 'Direct perimeter entry' }}</small></div>
+              <button class="icon-action" type="button" [attr.aria-label]="'Remove ' + field.displayText" (click)="removeField(field.id)">×</button>
+            </div>
+            <div class="field-totals">
+              <span *ngIf="hasAreaMeasurements">{{ totalArea | number:'1.0-0' }} sq ft total area</span>
+              <strong>≈ {{ totalPerimeter | number:'1.0-0' }} ft perimeter</strong>
+            </div>
+          </div>
+          <div class="empty-measurement" *ngIf="!fields.length">
+            <span aria-hidden="true">＋</span>
+            <span>Your plot measurements will appear here.</span>
+          </div>
+        </div>
+
+        <div class="form-section" *ngIf="productType === 'boundary-wall'">
+          <div class="section-heading">
+            <span class="step-number">03</span>
+            <div><h3>Wall specification</h3><p>Set the wall height for your estimate.</p></div>
+          </div>
+          <label class="field-label" for="wall-height">Wall height</label>
+          <div class="select-wrap">
+            <select id="wall-height" [(ngModel)]="wallHeight">
+              <option *ngFor="let height of wallHeights" [ngValue]="height">{{ height }} feet</option>
+            </select><span aria-hidden="true">⌄</span>
+          </div>
+          <div class="rate-note"><span aria-hidden="true">ⓘ</span> ₹85 / sq ft includes material and installation.</div>
+        </div>
+        </div>
+
+        <div class="form-section" *ngIf="productType === 'barbed-fencing'">
+          <div class="section-heading">
+            <span class="step-number">03</span>
+            <div><h3>Fencing specification</h3><p>Set spacing, support pillars, and wire details.</p></div>
+          </div>
+
+          <div class="fencing-grid">
+            <div>
+              <label class="field-label" for="pole-spacing">Pole spacing</label>
+              <div class="input-with-unit">
+                <input id="pole-spacing" type="number" min="1" [(ngModel)]="poleSpacingFt" />
+                <span>ft</span>
+              </div>
+            </div>
+            <div>
+              <label class="field-label" for="pole-rate">Pole rate</label>
+              <div class="input-with-unit">
+                <span class="prefix">₹</span>
+                <input id="pole-rate" type="number" min="1" [(ngModel)]="poleRate" />
+              </div>
+            </div>
+          </div>
+
+          <label class="checkbox-row" for="support-pillars-required">
+            <input id="support-pillars-required" type="checkbox" [(ngModel)]="supportPillarsRequired" (change)="onSupportPillarsToggle()" />
+            <span>Support pillars required?</span>
+          </label>
+
+          <div class="support-field" *ngIf="supportPillarsRequired">
+            <label class="field-label" for="support-pillar-count">Number of support pillars</label>
+            <div class="input-with-unit">
+              <input id="support-pillar-count" type="number" min="1" step="1" [(ngModel)]="supportPillarCount" />
+            </div>
+          </div>
+
+          <div class="installation-choice">
+            <label class="checkbox-row" for="installation-required">
+              <input id="installation-required" type="checkbox" [(ngModel)]="installationRequired" (change)="onInstallationToggle()" />
+              <span>Installation required?</span>
+            </label>
+            <p class="field-hint">Optional ₹110 per pillar. Includes labour, transport, loading and unloading, and installation.</p>
+          </div>
+
+          <div class="fencing-grid fencing-grid-secondary">
+            <div>
+              <label class="field-label" for="wire-rounds">Wire rounds</label>
+              <div class="select-wrap">
+                <select id="wire-rounds" [(ngModel)]="wireRounds">
+                  <option *ngFor="let roundCount of wireRoundOptions" [ngValue]="roundCount">{{ roundCount }} rounds</option>
+                </select><span aria-hidden="true">⌄</span>
+              </div>
+            </div>
+            <div>
+              <label class="field-label" for="wire-brand">Barbed wire</label>
+              <div class="select-wrap">
+                <select id="wire-brand" [(ngModel)]="selectedWireBrand" (change)="onWireBrandChange()">
+                  <option *ngFor="let wire of wireOptions" [ngValue]="wire.id">{{ wire.brand }}</option>
+                </select><span aria-hidden="true">⌄</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="single-field">
+            <label class="field-label" for="wire-rate">Wire rate</label>
+            <div class="input-with-unit">
+              <span class="prefix">₹</span>
+              <input id="wire-rate" type="number" min="0" step="0.01" [(ngModel)]="wireRatePerKg" />
+              <span>/ kg</span>
+            </div>
+          </div>
+
+          <div class="rate-note"><span aria-hidden="true">ⓘ</span> Wire weight responds to rounds; changing the rate does not change the weight.</div>
+        </div>
+
+        <div class="form-section extras-section">
+          <div class="extras-heading">
+            <div><h3>Additional expenses <span class="optional-tag">OPTIONAL</span></h3><p>Transport, site clearing, or any extra service.</p></div>
+            <button class="text-button" type="button" (click)="showExpenseForm = !showExpenseForm">{{ showExpenseForm ? 'Cancel' : '+ Add expense' }}</button>
+          </div>
+          <div class="expense-form" *ngIf="showExpenseForm">
+            <div class="manual-input-grid">
+              <div><label class="field-label" for="expense-name">Expense name</label><input class="plain-input" id="expense-name" type="text" placeholder="e.g. Transport" [(ngModel)]="expenseName" /></div>
+              <div><label class="field-label" for="expense-amount">Amount</label><div class="input-with-unit"><span class="prefix">₹</span><input id="expense-amount" type="number" min="1" [(ngModel)]="expenseAmount" /></div></div>
+            </div>
+            <label class="field-label" for="expense-description">Note <span class="optional-tag">OPTIONAL</span></label>
+            <input class="plain-input" id="expense-description" type="text" placeholder="A short note" [(ngModel)]="expenseDescription" />
+            <button class="button button-secondary expense-add" type="button" (click)="addExpense()">Add to estimate</button>
+          </div>
+          <div class="expense-item" *ngFor="let expense of expenses">
+            <span>{{ expense.name }}<small *ngIf="expense.description">{{ expense.description }}</small></span>
+            <strong>{{ expense.amount | currency:'INR':'symbol':'1.0-0':'en-IN' }}</strong>
+            <button class="icon-action" type="button" [attr.aria-label]="'Remove ' + expense.name" (click)="removeExpense(expense.id)">×</button>
+          </div>
+        </div>
+
+        <p class="form-message" *ngIf="message" role="alert">{{ message }}</p>
+        <button class="button button-primary calculate-button" type="button" [disabled]="!fields.length" (click)="calculate()">
+          Calculate estimate <span aria-hidden="true">→</span>
+        </button>
+        <p class="disclaimer">Quotation only. Actual cost may vary and will be finalized after site completion.</p>
+      </section>
+
+      <aside class="estimate-column animate-in">
+        <section #estimateCard class="estimate-card" [class.has-result]="result" aria-live="polite">
+          <header class="print-letterhead">
+            <div class="print-brand">SURAKSHA WALLS</div>
+            <div class="print-tagline">सुरक्षा हमारी, विश्वास आपका</div>
+            <div class="print-business-name">सुरक्षा वॉल्स <span>·</span> पिलर जाली उद्योग</div>
+            <p>काँटेदार तार, जाली और पिलर सहित मजबूत एवं टिकाऊ बाउंड्री निर्माण उचित दरों पर।</p>
+          </header>
+          <div class="print-document-title">QUOTATION ESTIMATE</div>
+          <div class="estimate-topline"><span>YOUR ESTIMATE</span><span class="estimate-symbol">↗</span></div>
+          <ng-container *ngIf="result; else estimatePlaceholder">
+            <p class="estimate-product">{{ result.productName }}</p>
+            <div class="estimate-total">{{ result.total | currency:'INR':'symbol':'1.0-0':'en-IN' }}</div>
+            <p class="estimate-caption">Estimated project total <span>INR</span></p>
+            <div class="estimate-divider"></div>
+            <div class="summary-metrics" [class.single-metric]="result.totalArea === 0">
+              <div><span>Perimeter</span><strong>{{ result.perimeterFeet | number:'1.0-0' }} <small>ft</small></strong></div>
+              <div *ngIf="result.totalArea > 0"><span>Area</span><strong>{{ result.totalArea | number:'1.0-0' }} <small>sq ft</small></strong></div>
+            </div>
+            <div class="breakdown">
+              <div class="breakdown-heading">COST BREAKDOWN <span>{{ result.lines.length }} ITEMS</span></div>
+              <div class="breakdown-line" *ngFor="let line of result.lines">
+                <span>{{ line.label }}</span><strong>{{ line.value }}</strong>
+              </div>
+            </div>
+            <div class="result-actions">
+              <button class="button button-primary share-button" type="button" (click)="shareOnWhatsApp()"><span aria-hidden="true">↗</span> Share via WhatsApp</button>
+              <button class="button button-secondary print-button" type="button" (click)="printQuote()"><span aria-hidden="true">▤</span> Print / Save PDF</button>
+            </div>
+            <p class="estimate-disclaimer">This is a quotation estimate. Actual cost may vary and will be finalized after site completion.</p>
+            <footer class="print-business-footer">
+              <div class="print-info-grid">
+                <section>
+                  <h3>हमारी विशेषताएँ</h3>
+                  <ul>
+                    <li>मजबूत एवं टिकाऊ निर्माण</li>
+                    <li>उच्च गुणवत्ता की सामग्री</li>
+                    <li>उचित मूल्य एवं समय पर कार्य</li>
+                    <li>ग्राहक संतुष्टि हमारी प्राथमिकता</li>
+                  </ul>
+                </section>
+                <section>
+                  <h3>हमारे उत्पाद</h3>
+                  <ul>
+                    <li>काँटेदार बाउंड्री</li>
+                    <li>जाली बाउंड्री</li>
+                    <li>पिलर वॉल</li>
+                  </ul>
+                </section>
+                <section>
+                  <h3>हमसे अभी संपर्क करें</h3>
+                  <p><strong>8090272727 · 9506629814</strong></p>
+                  <h3 class="print-location-heading">हमारे स्थान</h3>
+                  <p>शुकुलपुर, सुरियावाँ, भदोही<br>चौथर, सुरियावाँ, भदोही</p>
+                  <p><strong>Website:</strong> www.surakshawalls.shop</p>
+                </section>
+              </div>
+              <div class="print-closing">मजबूत दीवार, सुरक्षित परिवार</div>
+            </footer>
+          </ng-container>
+          <ng-template #estimatePlaceholder>
+            <div class="placeholder-mark" aria-hidden="true"><span>₹</span></div>
+            <h2>Your estimate<br>will appear here.</h2>
+            <p>Choose a calculation, add your measurements, and calculate to see a clear cost breakdown.</p>
+            <div class="placeholder-foot"><span class="status-dot"></span>Ready when you are</div>
+          </ng-template>
+        </section>
+        <div class="assumption-card">
+          <span class="assumption-icon" aria-hidden="true">✳</span>
+          <div><strong>A note on measurements</strong><p>1 Biswa is estimated as 1,350 sq ft. Area-based plots use a square perimeter approximation; use running feet for exact or irregular boundaries.</p></div>
+        </div>
+      </aside>
+    </div>
+
+    <footer class="app-footer">
+      <span>© {{ 2026 }} Suraksha Tools</span>
+      <span>Thoughtfully made by <a href="https://www.surakshawalls.space/software" target="_blank" rel="noopener noreferrer">Suraksha Software</a></span>
+      <span>Quotation calculator <span class="footer-separator">·</span> v1.0</span>
+    </footer>
+  </main>
+</div>
