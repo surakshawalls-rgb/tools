@@ -98,15 +98,24 @@
           </div>
 
           <div class="measurement-entry" *ngIf="measurementType === 'area'">
-            <label class="field-label" for="area-biswa">Land area</label>
-            <div class="field-row">
-              <div class="input-with-unit">
-                <input id="area-biswa" type="number" min="0.01" step="any" [(ngModel)]="areaBiswa" (keydown.enter)="addField()" />
-                <span>Biswa</span>
+            <div class="plot-dimensions">
+              <div>
+                <label class="field-label" for="area-biswa">Land area</label>
+                <div class="input-with-unit">
+                  <input id="area-biswa" type="number" min="0.01" step="any" [(ngModel)]="areaBiswa" (keydown.enter)="addField()" />
+                  <span>Biswa</span>
+                </div>
               </div>
-              <button class="button button-secondary add-button" type="button" (click)="addField()"><span aria-hidden="true">＋</span> Add plot</button>
+              <div>
+                <label class="field-label" for="plot-width">Front width</label>
+                <div class="input-with-unit">
+                  <input id="plot-width" type="number" min="0.01" step="any" placeholder="e.g. 8.25" [(ngModel)]="plotWidthFeet" (keydown.enter)="addField()" />
+                  <span>ft</span>
+                </div>
+              </div>
             </div>
-            <p class="field-hint">1 Biswa is estimated as 1,350 sq ft. Perimeter is approximated from a square plot.</p>
+            <button class="button button-secondary add-button plot-add-button" type="button" (click)="addField()"><span aria-hidden="true">＋</span> Add plot</button>
+            <p class="field-hint">Depth is calculated from area ÷ width, assuming a rectangle. 1 Biswa is estimated as 1,361.25 sq ft.</p>
           </div>
 
           <div class="measurement-entry" *ngIf="measurementType === 'perimeter'">
@@ -125,12 +134,12 @@
             <div class="field-list-heading"><strong>Measurements added</strong><span>{{ fields.length }} {{ fields.length === 1 ? 'entry' : 'entries' }}</span></div>
             <div class="field-row-item" *ngFor="let field of fields">
               <span class="field-check" aria-hidden="true">✓</span>
-              <div class="field-item-copy"><strong>{{ field.displayText }}</strong><small>{{ field.measurementType === 'area' ? ((field.biswa ?? 0) * biswaToSqFt | number:'1.0-0') + ' sq ft · approx. square plot' : 'Direct perimeter entry' }}</small></div>
+              <div class="field-item-copy"><strong>{{ field.displayText }}</strong><small>{{ field.measurementType === 'area' ? ((field.biswa ?? 0) * biswaToSqFt | number:'1.0-2') + ' sq ft · ' + (field.widthFeet | number:'1.0-2') + ' ft wide × ' + (field.lengthFeet | number:'1.0-2') + ' ft deep' : 'Direct perimeter entry' }}</small></div>
               <button class="icon-action" type="button" [attr.aria-label]="'Remove ' + field.displayText" (click)="removeField(field.id)">×</button>
             </div>
             <div class="field-totals">
-              <span *ngIf="hasAreaMeasurements">{{ totalArea | number:'1.0-0' }} sq ft total area</span>
-              <strong>≈ {{ totalPerimeter | number:'1.0-0' }} ft perimeter</strong>
+              <span *ngIf="hasAreaMeasurements">{{ totalArea | number:'1.0-2' }} sq ft total area</span>
+              <strong>{{ totalPerimeter | number:'1.0-2' }} ft perimeter</strong>
             </div>
           </div>
           <div class="empty-measurement" *ngIf="!fields.length">
@@ -297,8 +306,8 @@
             <p class="estimate-caption">Estimated project total <span>INR</span></p>
             <div class="estimate-divider"></div>
             <div class="summary-metrics" [class.single-metric]="result.totalArea === 0">
-              <div><span>Perimeter</span><strong>{{ result.perimeterFeet | number:'1.0-0' }} <small>ft</small></strong></div>
-              <div *ngIf="result.totalArea > 0"><span>Area</span><strong>{{ result.totalArea | number:'1.0-0' }} <small>sq ft</small></strong></div>
+              <div><span>Perimeter</span><strong>{{ result.perimeterFeet | number:'1.0-2' }} <small>ft</small></strong></div>
+              <div *ngIf="result.totalArea > 0"><span>Area</span><strong>{{ result.totalArea | number:'1.0-2' }} <small>sq ft</small></strong></div>
             </div>
             <div class="breakdown">
               <div class="breakdown-heading">COST BREAKDOWN <span>{{ result.lines.length }} ITEMS</span></div>
@@ -350,7 +359,7 @@
         </section>
         <div class="assumption-card">
           <span class="assumption-icon" aria-hidden="true">✳</span>
-          <div><strong>A note on measurements</strong><p>1 Biswa is estimated as 1,350 sq ft. Area-based plots use a square perimeter approximation; use running feet for exact or irregular boundaries.</p></div>
+          <div><strong>A note on measurements</strong><p>1 Biswa is estimated as 1,361.25 sq ft. Area-based plots assume a rectangle: enter the front width to calculate depth and perimeter. Use running feet for irregular plots.</p></div>
         </div>
       </aside>
     </div>

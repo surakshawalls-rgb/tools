@@ -563,6 +563,14 @@
 
 .measurement-entry { margin-top: 20px; }
 
+.plot-dimensions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.plot-add-button { width: 100%; margin-top: 10px; }
+
 .field-label {
   display: block;
   margin: 0 0 8px;

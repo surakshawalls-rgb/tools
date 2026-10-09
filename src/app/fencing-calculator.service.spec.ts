@@ -28,6 +28,11 @@ describe('FencingCalculatorService', () => {
     expect(result.poleCost).toBe(4500);
   });
 
+  it('calculates a rectangular perimeter from area and front width', () => {
+    expect(service.calculateRectangularPerimeter(1361.25, 8.25)).toBe(346.5);
+    expect(service.calculateRectangularPerimeter(2722.5, 8.25)).toBe(676.5);
+  });
+
   it('calculates with 3 support pillars', () => {
     const result = service.calculate(
       {

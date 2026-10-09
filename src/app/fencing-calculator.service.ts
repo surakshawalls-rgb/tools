@@ -65,6 +65,11 @@ export class FencingCalculatorService {
     return Math.ceil(perimeterFeet / poleSpacingFt);
   }
 
+  calculateRectangularPerimeter(areaSquareFeet: number, widthFeet: number): number {
+    const lengthFeet = areaSquareFeet / widthFeet;
+    return 2 * (widthFeet + lengthFeet);
+  }
+
   calculateSupportPillars(supportPillarsRequired: boolean, supportPillarCount: number): number {
     if (!supportPillarsRequired) {
       return 0;

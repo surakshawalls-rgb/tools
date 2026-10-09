@@ -12,6 +12,8 @@ interface QuoteField {
   measurementType: MeasurementType;
   displayText: string;
   biswa?: number;
+  widthFeet?: number;
+  lengthFeet?: number;
   perimeterFeet?: number;
 }
 
@@ -50,7 +52,7 @@ interface QuoteResult {
 export class App implements AfterViewInit, OnDestroy {
   @ViewChild('estimateCard') private estimateCard?: ElementRef<HTMLElement>;
 
-  readonly biswaToSqFt = 1350;
+  readonly biswaToSqFt = 1361.25;
   boundaryWallRate: number | null = 85;
   readonly wallHeights = [4, 5, 6, 7, 8, 9, 10];
   readonly wireRoundOptions = [3, 4, 5, 6];
@@ -64,6 +66,7 @@ export class App implements AfterViewInit, OnDestroy {
   measurementType: MeasurementType = 'area';
   customPricing = false;
   areaBiswa = 1;
+  plotWidthFeet: number | null = null;
   customPerimeter: number | null = null;
   wallHeight = 6;
 
@@ -171,10 +174,22 @@ export class App implements AfterViewInit, OnDestroy {
         return;
       }
 
+      const width = Number(this.plotWidthFeet);
+      if (!Number.isFinite(width) || width <= 0) {
+        this.message = 'Enter a plot width greater than zero.';
+        return;
+      }
+
+      const area = biswa * this.biswaToSqFt;
+      const length = area / width;
+      const perimeter = this.fencingCalculator.calculateRectangularPerimeter(area, width);
       this.fields.push({
         id: this.nextFieldId++,
         measurementType: 'area',
         biswa,
+        widthFeet: width,
+        lengthFeet: length,
+        perimeterFeet: perimeter,
         displayText: `${biswa.toLocaleString('en-IN')} Biswa`
       });
     } else {
@@ -193,6 +208,9 @@ export class App implements AfterViewInit, OnDestroy {
       this.customPerimeter = null;
     }
 
+    if (this.measurementType === 'area') {
+      this.plotWidthFeet = null;
+    }
     this.result = null;
     this.message = '';
   }
@@ -234,7 +252,7 @@ export class App implements AfterViewInit, OnDestroy {
   }
 
   get totalArea(): number {
-    return Math.round(this.totalBiswa * this.biswaToSqFt);
+    return this.totalBiswa * this.biswaToSqFt;
   }
 
   get hasAreaMeasurements(): boolean {
@@ -247,8 +265,7 @@ export class App implements AfterViewInit, OnDestroy {
         return total + (field.perimeterFeet ?? 0);
       }
 
-      const area = (field.biswa ?? 0) * this.biswaToSqFt;
-      return total + 4 * Math.sqrt(area);
+      return total + (field.perimeterFeet ?? 0);
     }, 0);
   }
 
@@ -285,9 +302,15 @@ export class App implements AfterViewInit, OnDestroy {
     const baseLines: BreakdownLine[] = [
       { label: 'Measurements included', value: String(this.fields.length) },
       ...(this.hasAreaMeasurements
-        ? [{ label: 'Total land area', value: `${totalArea.toLocaleString('en-IN')} sq ft` }]
+        ? [{ label: 'Total land area', value: `${totalArea.toLocaleString('en-IN', { maximumFractionDigits: 2 })} sq ft` }]
         : []),
-      { label: 'Total perimeter', value: `${Math.round(perimeterFeet).toLocaleString('en-IN')} ft (${perimeterMeters} m)` }
+      ...this.fields
+        .filter((field) => field.measurementType === 'area')
+        .map((field) => ({
+          label: `Plot dimensions (${field.biswa?.toLocaleString('en-IN')} Biswa)`,
+          value: `${field.widthFeet?.toLocaleString('en-IN', { maximumFractionDigits: 2 })} × ${field.lengthFeet?.toLocaleString('en-IN', { maximumFractionDigits: 2 })} ft`
+        })),
+      { label: 'Total perimeter', value: `${perimeterFeet.toLocaleString('en-IN', { maximumFractionDigits: 2 })} ft (${perimeterMeters} m)` }
     ];
 
     if (this.productType === 'boundary-wall') {
@@ -306,6 +329,7 @@ export class App implements AfterViewInit, OnDestroy {
     this.customPricing = false;
     this.boundaryWallRate = 85;
     this.areaBiswa = 1;
+    this.plotWidthFeet = null;
     this.customPerimeter = null;
     this.wallHeight = 6;
     this.poleSpacingFt = 10;
@@ -367,20 +391,20 @@ export class App implements AfterViewInit, OnDestroy {
     expenseTotal: number
   ): void {
     const wallRate = this.boundaryWallRate ?? 85;
-    const wallArea = Math.round(perimeterFeet * this.wallHeight);
+    const wallArea = perimeterFeet * this.wallHeight;
     const wallCost = Math.round(wallArea * wallRate);
     const total = wallCost + expenseTotal;
 
     this.result = {
       productName: 'Precast Boundary Wall',
       totalArea: this.totalArea,
-      perimeterFeet: Math.round(perimeterFeet),
+      perimeterFeet: Math.round(perimeterFeet * 100) / 100,
       perimeterMeters: Math.round(perimeterFeet * 0.3048 * 10) / 10,
       wallHeight: this.wallHeight,
       wallArea,
       lines: [
         ...baseLines,
-        { label: `Wall area (${this.wallHeight} ft high)`, value: `${wallArea.toLocaleString('en-IN')} sq ft` },
+        { label: `Wall area (${this.wallHeight} ft high)`, value: `${wallArea.toLocaleString('en-IN', { maximumFractionDigits: 2 })} sq ft` },
         { label: 'All-inclusive wall rate', value: `${this.formatCurrency(wallRate)} / sq ft` },
         { label: 'Wall work', value: this.formatCurrency(wallCost) },
         { label: 'Installation', value: 'Included in rate' }
@@ -454,7 +478,7 @@ export class App implements AfterViewInit, OnDestroy {
     this.result = {
       productName: 'Barbed Wire Fencing',
       totalArea: this.totalArea,
-      perimeterFeet: Math.round(perimeterFeet),
+      perimeterFeet: Math.round(perimeterFeet * 100) / 100,
       perimeterMeters: Math.round(perimeterFeet * 0.3048 * 10) / 10,
       poles: calculation.totalPillars,
       wireWeight: calculation.wireWeightKg,
