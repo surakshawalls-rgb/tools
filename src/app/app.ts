@@ -54,10 +54,10 @@ export class App implements AfterViewInit, OnDestroy {
 
   readonly biswaToSqFt = 1361.25;
   boundaryWallRate: number | null = 85;
-  readonly wallHeights = [4, 5, 6, 7, 8, 9, 10];
+  readonly wallHeights = [2, 3, 4, 5, 6, 7, 8, 9, 10];
   readonly wireRoundOptions = [3, 4, 5, 6];
   readonly wireOptions: WireOption[] = [
-    { id: 'standard', brand: 'Standard', specification: 'Heavy duty', ratePerKg: 105 },
+    { id: 'standard', brand: 'Standard', specification: 'Heavy duty', ratePerKg: 110 },
     { id: 'premium', brand: 'Premium', specification: 'Premium quality', ratePerKg: 120 },
     { id: 'heavy-duty', brand: 'Heavy duty', specification: 'High strength', ratePerKg: 150 }
   ];
@@ -78,7 +78,7 @@ export class App implements AfterViewInit, OnDestroy {
   installationRequired = false;
   wireRounds = 3;
   selectedWireBrand = 'standard';
-  wireRatePerKg: number | null = 105;
+  wireRatePerKg: number | null = 110;
 
   fields: QuoteField[] = [];
   expenses: QuoteExpense[] = [];
@@ -340,7 +340,7 @@ export class App implements AfterViewInit, OnDestroy {
     this.installationRequired = false;
     this.wireRounds = 3;
     this.selectedWireBrand = 'standard';
-    this.wireRatePerKg = 105;
+    this.wireRatePerKg = 110;
     this.fields = [];
     this.expenses = [];
     this.result = null;

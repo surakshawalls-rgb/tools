@@ -17,7 +17,7 @@ describe('FencingCalculatorService', () => {
         installationRequired: false,
         wireRounds: 3,
         wireBrand: 'standard',
-        wireRatePerKg: 105
+        wireRatePerKg: 110
       },
       100
     );
@@ -43,7 +43,7 @@ describe('FencingCalculatorService', () => {
         installationRequired: false,
         wireRounds: 3,
         wireBrand: 'standard',
-        wireRatePerKg: 105
+        wireRatePerKg: 110
       },
       100
     );
@@ -64,7 +64,7 @@ describe('FencingCalculatorService', () => {
         installationRequired: false,
         wireRounds: 3,
         wireBrand: 'standard',
-        wireRatePerKg: 105
+        wireRatePerKg: 110
       },
       100
     );
@@ -83,7 +83,7 @@ describe('FencingCalculatorService', () => {
         installationRequired: false,
         wireRounds: 3,
         wireBrand: 'standard',
-        wireRatePerKg: 105
+        wireRatePerKg: 110
       },
       100
     );
@@ -115,15 +115,15 @@ describe('FencingCalculatorService', () => {
         installationRequired: false,
         wireRounds: 3,
         wireBrand: 'standard',
-        wireRatePerKg: 105
+        wireRatePerKg: 110
       },
       100
     );
 
     expect(result.poleCost).toBe(5850);
-    expect(result.wireCost).toBe(1050);
+    expect(result.wireCost).toBe(1100);
     expect(result.installationCost).toBe(0);
-    expect(result.total).toBe(6900);
+    expect(result.total).toBe(6950);
   });
 
   it('adds installation and handling at ₹110 for every total pillar when selected', () => {
@@ -136,14 +136,14 @@ describe('FencingCalculatorService', () => {
         installationRequired: true,
         wireRounds: 3,
         wireBrand: 'standard',
-        wireRatePerKg: 105
+        wireRatePerKg: 110
       },
       100
     );
 
     expect(result.totalPillars).toBe(13);
     expect(result.installationCost).toBe(1430);
-    expect(result.total).toBe(8330);
+    expect(result.total).toBe(8380);
   });
 
   it('rejects invalid support pillar counts', () => {
