@@ -51,7 +51,7 @@ export class App implements AfterViewInit, OnDestroy {
   @ViewChild('estimateCard') private estimateCard?: ElementRef<HTMLElement>;
 
   readonly biswaToSqFt = 1350;
-  readonly boundaryWallRate = 85;
+  boundaryWallRate: number | null = 85;
   readonly wallHeights = [4, 5, 6, 7, 8, 9, 10];
   readonly wireRoundOptions = [3, 4, 5, 6];
   readonly wireOptions: WireOption[] = [
@@ -62,18 +62,20 @@ export class App implements AfterViewInit, OnDestroy {
 
   productType: ProductType = 'boundary-wall';
   measurementType: MeasurementType = 'area';
+  customPricing = false;
   areaBiswa = 1;
   customPerimeter: number | null = null;
   wallHeight = 6;
 
   poleSpacingFt = 10;
-  poleRate = 450;
+  poleRate: number | null = 450;
+  installationRatePerPillar: number | null = 110;
   supportPillarsRequired = false;
   supportPillarCount = 0;
   installationRequired = false;
   wireRounds = 3;
   selectedWireBrand = 'standard';
-  wireRatePerKg = 105;
+  wireRatePerKg: number | null = 105;
 
   fields: QuoteField[] = [];
   expenses: QuoteExpense[] = [];
@@ -134,10 +136,31 @@ export class App implements AfterViewInit, OnDestroy {
   }
 
   onWireBrandChange(): void {
+    if (this.customPricing) {
+      return;
+    }
+
     const selected = this.wireOptions.find((wire) => wire.id === this.selectedWireBrand);
     if (selected) {
       this.wireRatePerKg = selected.ratePerKg;
     }
+  }
+
+  onCustomPricingToggle(): void {
+    if (this.customPricing) {
+      this.boundaryWallRate = null;
+      this.poleRate = null;
+      this.wireRatePerKg = null;
+      this.installationRatePerPillar = null;
+    } else {
+      this.boundaryWallRate = 85;
+      this.poleRate = 450;
+      this.wireRatePerKg = this.selectedWire.ratePerKg;
+      this.installationRatePerPillar = this.fencingCalculator.installationRatePerPillar;
+    }
+
+    this.result = null;
+    this.message = '';
   }
 
   addField(): void {
@@ -240,6 +263,21 @@ export class App implements AfterViewInit, OnDestroy {
       return;
     }
 
+    if (this.customPricing) {
+      const ratesAreValid = this.productType === 'boundary-wall'
+        ? this.isRate(this.boundaryWallRate)
+        : this.isRate(this.poleRate) &&
+          this.isRate(this.wireRatePerKg) &&
+          (!this.installationRequired || this.isRate(this.installationRatePerPillar));
+      if (!ratesAreValid) {
+        this.message = this.productType === 'boundary-wall'
+          ? 'Enter a custom wall rate of zero or more.'
+          : 'Enter custom rates of zero or more for poles, wire, and required installation.';
+        this.result = null;
+        return;
+      }
+    }
+
     const perimeterFeet = this.totalPerimeter;
     const totalArea = this.totalArea;
     const perimeterMeters = Math.round(perimeterFeet * 0.3048 * 10) / 10;
@@ -265,11 +303,14 @@ export class App implements AfterViewInit, OnDestroy {
   reset(): void {
     this.productType = 'boundary-wall';
     this.measurementType = 'area';
+    this.customPricing = false;
+    this.boundaryWallRate = 85;
     this.areaBiswa = 1;
     this.customPerimeter = null;
     this.wallHeight = 6;
     this.poleSpacingFt = 10;
     this.poleRate = 450;
+    this.installationRatePerPillar = this.fencingCalculator.installationRatePerPillar;
     this.supportPillarsRequired = false;
     this.supportPillarCount = 0;
     this.installationRequired = false;
@@ -325,8 +366,9 @@ export class App implements AfterViewInit, OnDestroy {
     perimeterFeet: number,
     expenseTotal: number
   ): void {
+    const wallRate = this.boundaryWallRate ?? 85;
     const wallArea = Math.round(perimeterFeet * this.wallHeight);
-    const wallCost = Math.round(wallArea * this.boundaryWallRate);
+    const wallCost = Math.round(wallArea * wallRate);
     const total = wallCost + expenseTotal;
 
     this.result = {
@@ -339,7 +381,7 @@ export class App implements AfterViewInit, OnDestroy {
       lines: [
         ...baseLines,
         { label: `Wall area (${this.wallHeight} ft high)`, value: `${wallArea.toLocaleString('en-IN')} sq ft` },
-        { label: 'All-inclusive wall rate', value: `${this.formatCurrency(this.boundaryWallRate)} / sq ft` },
+        { label: 'All-inclusive wall rate', value: `${this.formatCurrency(wallRate)} / sq ft` },
         { label: 'Wall work', value: this.formatCurrency(wallCost) },
         { label: 'Installation', value: 'Included in rate' }
       ],
@@ -372,13 +414,14 @@ export class App implements AfterViewInit, OnDestroy {
 
     const configuration = {
       poleSpacingFt: Number(this.poleSpacingFt) || 10,
-      poleRate: Number(this.poleRate) || 450,
+      poleRate: this.poleRate ?? 450,
       supportPillarsRequired: this.supportPillarsRequired,
       supportPillarCount: this.supportPillarsRequired ? Number(this.supportPillarCount) : 0,
       installationRequired: this.installationRequired,
       wireRounds: Number(this.wireRounds) || 3,
       wireBrand: this.selectedWireBrand,
-      wireRatePerKg: Number(this.wireRatePerKg) || this.selectedWire.ratePerKg
+      wireRatePerKg: this.wireRatePerKg ?? this.selectedWire.ratePerKg,
+      installationRatePerPillar: this.installationRatePerPillar ?? this.fencingCalculator.installationRatePerPillar
     };
 
     const calculation = this.fencingCalculator.calculate(configuration, perimeterFeet);
@@ -394,7 +437,7 @@ export class App implements AfterViewInit, OnDestroy {
       {
         label: 'Installation package (labour, transport, loading/unloading)',
         value: this.installationRequired
-          ? `${calculation.totalPillars} × ${this.formatCurrency(this.fencingCalculator.installationRatePerPillar)} · ${this.formatCurrency(calculation.installationCost)}`
+          ? `${calculation.totalPillars} × ${this.formatCurrency(configuration.installationRatePerPillar)} · ${this.formatCurrency(calculation.installationCost)}`
           : 'Not included'
       }
     ];
@@ -420,6 +463,10 @@ export class App implements AfterViewInit, OnDestroy {
     };
 
     this.message = '';
+  }
+
+  private isRate(value: number | null): value is number {
+    return value !== null && Number.isFinite(value) && value >= 0;
   }
 
   private recalculateIfShown(): void {

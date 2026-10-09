@@ -16,6 +16,7 @@ export interface FencingConfiguration {
   wireRounds: number;
   wireBrand?: string;
   wireRatePerKg: number;
+  installationRatePerPillar?: number;
 }
 
 export interface FencingCalculationResult {
@@ -97,8 +98,12 @@ export class FencingCalculatorService {
     return Math.round(wireWeightKg * wireRatePerKg);
   }
 
-  calculateInstallation(totalPillars: number, installationRequired: boolean): number {
-    return installationRequired ? totalPillars * this.installationRatePerPillar : 0;
+  calculateInstallation(
+    totalPillars: number,
+    installationRequired: boolean,
+    ratePerPillar = this.installationRatePerPillar
+  ): number {
+    return installationRequired ? totalPillars * ratePerPillar : 0;
   }
 
   calculate(
@@ -115,7 +120,11 @@ export class FencingCalculatorService {
     const wireRounds = Number(config.wireRounds) || this.defaultWireRounds;
     const wireWeightKg = this.calculateWireWeight(perimeterFeet, config.poleSpacingFt, wireRounds);
     const wireCost = this.calculateWireCost(wireWeightKg, config.wireRatePerKg);
-    const installationCost = this.calculateInstallation(totalPillars, config.installationRequired);
+    const installationCost = this.calculateInstallation(
+      totalPillars,
+      config.installationRequired,
+      config.installationRatePerPillar
+    );
 
     return {
       perimeterFeet: Math.round(perimeterFeet),

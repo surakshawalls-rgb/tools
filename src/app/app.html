@@ -41,7 +41,13 @@
             <div class="eyebrow eyebrow-dark"><span class="eyebrow-line"></span>BUILD A QUOTE</div>
             <h2 id="builder-title">Quotation details</h2>
           </div>
-          <button class="text-button" type="button" (click)="reset()">Start over <span aria-hidden="true">↺</span></button>
+          <div class="panel-heading-actions">
+            <label class="checkbox-row custom-pricing-toggle" for="custom-pricing">
+              <input id="custom-pricing" type="checkbox" [(ngModel)]="customPricing" (change)="onCustomPricingToggle()" />
+              <span>Custom pricing</span>
+            </label>
+            <button class="text-button" type="button" (click)="reset()">Start over <span aria-hidden="true">↺</span></button>
+          </div>
         </div>
 
         <div class="form-section">
@@ -56,7 +62,8 @@
               (click)="chooseProduct('boundary-wall')">
               <span class="product-icon">⌂</span>
               <span class="product-title">Boundary Wall</span>
-              <span class="product-price">₹85 <small>/ sq ft</small></span>
+              <span class="product-price" *ngIf="!customPricing">₹85 <small>/ sq ft</small></span>
+              <span class="product-price" *ngIf="customPricing">{{ boundaryWallRate === null ? 'Enter rate' : (formatCurrency(boundaryWallRate) + ' / sq ft') }}</span>
               <span class="product-note">All inclusive</span>
               <span class="select-mark" aria-hidden="true">✓</span>
             </button>
@@ -66,7 +73,8 @@
               (click)="chooseProduct('barbed-fencing')">
               <span class="product-icon">⌁</span>
               <span class="product-title">Barbed Wire Fencing</span>
-              <span class="product-price">₹450 <small>/ pole</small></span>
+              <span class="product-price" *ngIf="!customPricing">₹450 <small>/ pole</small></span>
+              <span class="product-price" *ngIf="customPricing">{{ poleRate === null ? 'Enter rate' : (formatCurrency(poleRate) + ' / pole') }}</span>
               <span class="product-note">Materials & installation</span>
               <span class="select-mark" aria-hidden="true">✓</span>
             </button>
@@ -142,7 +150,16 @@
               <option *ngFor="let height of wallHeights" [ngValue]="height">{{ height }} feet</option>
             </select><span aria-hidden="true">⌄</span>
           </div>
-          <div class="rate-note"><span aria-hidden="true">ⓘ</span> ₹85 / sq ft includes material and installation.</div>
+          <div class="single-field" *ngIf="customPricing">
+            <label class="field-label" for="wall-rate">Custom wall rate</label>
+            <div class="input-with-unit">
+              <span class="prefix">₹</span>
+              <input id="wall-rate" type="number" min="0" step="0.01" placeholder="Enter rate" [(ngModel)]="boundaryWallRate" />
+              <span>/ sq ft</span>
+            </div>
+          </div>
+          <div class="rate-note" *ngIf="!customPricing"><span aria-hidden="true">ⓘ</span> ₹85 / sq ft includes material and installation.</div>
+          <div class="rate-note" *ngIf="customPricing"><span aria-hidden="true">ⓘ</span> Enter your all-inclusive wall rate per sq ft.</div>
         </div>
         </div>
 
@@ -160,11 +177,18 @@
                 <span>ft</span>
               </div>
             </div>
-            <div>
+            <div *ngIf="!customPricing">
               <label class="field-label" for="pole-rate">Pole rate</label>
               <div class="input-with-unit">
                 <span class="prefix">₹</span>
-                <input id="pole-rate" type="number" min="1" [(ngModel)]="poleRate" />
+                <input id="pole-rate" type="number" value="450" readonly aria-label="Default pole rate" />
+              </div>
+            </div>
+            <div *ngIf="customPricing">
+              <label class="field-label" for="pole-rate">Custom pole rate</label>
+              <div class="input-with-unit">
+                <span class="prefix">₹</span>
+                <input id="pole-rate" type="number" min="0" step="0.01" placeholder="Enter rate" [(ngModel)]="poleRate" />
               </div>
             </div>
           </div>
@@ -186,7 +210,15 @@
               <input id="installation-required" type="checkbox" [(ngModel)]="installationRequired" (change)="onInstallationToggle()" />
               <span>Installation required?</span>
             </label>
-            <p class="field-hint">Optional ₹110 per pillar. Includes labour, transport, loading and unloading, and installation.</p>
+            <p class="field-hint" *ngIf="!customPricing">Optional ₹110 per pillar. Includes labour, transport, loading and unloading, and installation.</p>
+            <div class="single-field" *ngIf="customPricing && installationRequired">
+              <label class="field-label" for="installation-rate">Custom installation rate</label>
+              <div class="input-with-unit">
+                <span class="prefix">₹</span>
+                <input id="installation-rate" type="number" min="0" step="0.01" placeholder="Enter rate" [(ngModel)]="installationRatePerPillar" />
+                <span>/ pillar</span>
+              </div>
+            </div>
           </div>
 
           <div class="fencing-grid fencing-grid-secondary">
@@ -208,15 +240,16 @@
             </div>
           </div>
 
-          <div class="single-field">
+          <div class="single-field" *ngIf="customPricing">
             <label class="field-label" for="wire-rate">Wire rate</label>
             <div class="input-with-unit">
               <span class="prefix">₹</span>
-              <input id="wire-rate" type="number" min="0" step="0.01" [(ngModel)]="wireRatePerKg" />
+              <input id="wire-rate" type="number" min="0" step="0.01" placeholder="Enter rate" [(ngModel)]="wireRatePerKg" />
               <span>/ kg</span>
             </div>
           </div>
 
+          <div class="rate-note" *ngIf="!customPricing"><span aria-hidden="true">ⓘ</span> Pole: ₹450 each · Wire: {{ formatCurrency(selectedWire.ratePerKg) }} / kg · Installation: ₹110 per pillar when selected.</div>
           <div class="rate-note"><span aria-hidden="true">ⓘ</span> Wire weight responds to rounds; changing the rate does not change the weight.</div>
         </div>
 

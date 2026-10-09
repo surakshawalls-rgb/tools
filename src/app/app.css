@@ -299,6 +299,19 @@
   border-bottom: 1px solid var(--border-light);
 }
 
+.panel-heading-actions {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.panel-heading-actions .custom-pricing-toggle {
+  margin-top: 0;
+  white-space: nowrap;
+}
+
 .eyebrow-dark {
   margin-bottom: 9px;
   color: #77839a;
@@ -1250,7 +1263,10 @@
   .hero-meta { gap: 8px 14px; margin-top: 21px; font-size: 9px; }
   .hero-meta > span { gap: 5px; }
   .panel { padding: 17px 14px; border-radius: 11px; }
-  .panel-heading { padding-bottom: 17px; }
+  .panel-heading-actions { gap: 6px; }
+  .panel-heading-actions .custom-pricing-toggle { gap: 6px; font-size: 10px; }
+  .panel-heading { flex-wrap: wrap; gap: 12px; padding-bottom: 17px; }
+  .panel-heading-actions { width: 100%; justify-content: space-between; }
   .panel-heading h2 { font-size: 24px; }
   .form-section { padding: 19px 0; }
   .product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
